@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -78,5 +76,19 @@ class ProductController extends Controller
     {
         $product->delete();
         return redirect('/admin/products')->with('success', 'Product deleted');
+    }
+
+    // Pencarian produk berdasarkan kategori
+    public function searchByCategory(Request $request)
+    {
+        $category = $request->query('category');
+
+        if ($category) {
+            $products = Product::where('category', 'LIKE', "%{$category}%")->get();
+        } else {
+            $products = Product::all();
+        }
+
+        return view('products.search', compact('products', 'category'));
     }
 }
