@@ -40,9 +40,13 @@
             </div>
 
             <div class="mb-4">
-                <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                <input type="text" name="category" id="category" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" value="{{ old('category', $product->category) }}" placeholder="e.g., electronics, clothing">
-                @error('category')
+                <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
+                <select name="category_id" id="category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                    @endforeach
+                </select>
+                @error('category_id')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>

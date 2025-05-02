@@ -2,6 +2,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 // Rute untuk autentikasi
@@ -15,10 +16,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('home');
 
-    // Tambahan: Rute produk untuk user biasa
+    // Rute produk untuk user biasa
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-    // Rute untuk pencarian berdasarkan kategori
+    // Rute untuk pencarian berdasarkan kategori di halaman produk (opsional, bisa dihapus jika tidak dibutuhkan)
     Route::get('/products/search', [ProductController::class, 'searchByCategory'])->name('products.search');
 
     // Rute untuk user
@@ -33,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/buy', [TransactionController::class, 'buyFromCart'])->name('cart.buy');
     Route::post('/cart/clear', [TransactionController::class, 'clearCart'])->name('cart.clear');
 
+    // Rute untuk kategori (terpisah, bisa diakses semua user untuk melihat)
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
     // Rute untuk admin
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         // Produk
@@ -46,5 +50,12 @@ Route::middleware('auth')->group(function () {
         // Transaksi
         Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
         Route::put('/transactions/{transaction}', [TransactionController::class, 'updateStatus'])->name('transactions.update');
+
+        // Rute CRUD untuk kategori (hanya admin)
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     });
 });

@@ -1,94 +1,119 @@
 <?php
 namespace App\Http\Controllers;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
-// Controller untuk mengelola produk (CRUD)
 class ProductController extends Controller
 {
-    // Menampilkan daftar semua produk
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all();
-        return view('products.index', compact('products'));
+        $categories = Category::all();
+        $category_id = $request->query('category_id');
+        $search = $request->query('search');
+
+        $products = Product::query()->with('category');
+
+        if ($category_id) {
+            $products->where('category_id', $category_id);
+        }
+
+        if ($search) {
+            $products->where('name', 'LIKE', "%{$search}%");
+        }
+
+        $products = $products->get();
+
+        return view('products.index', compact('categories', 'products', 'category_id', 'search'));
     }
 
-    // Menampilkan form untuk membuat produk baru
     public function create()
     {
-        return view('products.create');
+        $categories = Category::all();
+        return view('products.create', compact('categories'));
     }
 
-    // Menyimpan produk baru ke database
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'name' => 'required',
             'description' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
+            'category_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image',
         ]);
 
         $data = $request->all();
-        // Menyimpan gambar jika ada
+
+        if (empty($data['category_id'])) {
+            $defaultCategory = Category::firstOrCreate(
+                ['name' => 'Default'],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+            $data['category_id'] = $defaultCategory->id;
+        }
+
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        // Membuat produk baru
         Product::create($data);
         return redirect('/admin/products')->with('success', 'Product created');
     }
 
-    // Menampilkan form untuk mengedit produk
-    public function edit(Product $product)
-    {
-        return view('products.edit', compact('product'));
-    }
-
-    // Memperbarui produk di database
     public function update(Request $request, Product $product)
     {
-        // Validasi input
         $request->validate([
             'name' => 'required',
             'description' => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
+            'category_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image',
         ]);
 
         $data = $request->all();
-        // Memperbarui gambar jika ada
+
+        if (empty($data['category_id'])) {
+            $defaultCategory = Category::firstOrCreate(
+                ['name' => 'Default'],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+            $data['category_id'] = $defaultCategory->id;
+        }
+
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        // Memperbarui produk
         $product->update($data);
         return redirect('/admin/products')->with('success', 'Product updated');
     }
 
-    // Menghapus produk dari database
+    public function edit(Product $product)
+    {
+        $categories = Category::all();
+        return view('products.edit', compact('product', 'categories'));
+    }
+
     public function destroy(Product $product)
     {
         $product->delete();
         return redirect('/admin/products')->with('success', 'Product deleted');
     }
 
-    // Pencarian produk berdasarkan kategori
     public function searchByCategory(Request $request)
     {
-        $category = $request->query('category');
+        $category_id = $request->query('category_id');
+        $categories = Category::all();
 
-        if ($category) {
-            $products = Product::where('category', 'LIKE', "%{$category}%")->get();
+        if ($category_id) {
+            $products = Product::where('category_id', $category_id)->get();
         } else {
             $products = Product::all();
         }
 
-        return view('products.search', compact('products', 'category'));
+        return view('products.search', compact('products', 'categories', 'category_id'));
     }
 }

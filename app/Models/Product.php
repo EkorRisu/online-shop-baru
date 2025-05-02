@@ -1,12 +1,23 @@
 <?php
-
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// Model untuk tabel products, mewakili produk di toko
 class Product extends Model
 {
-    // Kolom yang dapat diisi secara massal
-    protected $fillable = ['name', 'description', 'price', 'stock','category', 'image'];
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'stock',
+        'category_id',
+        'image',
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }

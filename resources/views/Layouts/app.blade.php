@@ -19,6 +19,7 @@
                         <!-- Link khusus untuk admin -->
                         <a href="{{ route('admin.products.index') }}" class="mr-4">Manage Products</a>
                         <a href="{{ route('admin.transactions.index') }}" class="mr-4">Manage Transactions</a>
+                        <a href="{{ route('categories.index') }}" class="text-white hover:text-gray-300">Categories</a>
                     @else
                         <!-- Link untuk user -->
                         <a href="{{ route('transactions.index') }}" class="mr-4">My Transactions</a>
