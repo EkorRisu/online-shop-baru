@@ -15,11 +15,24 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // Membuat akun admin dengan email dan password default
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@shop.com',
-            'password' => Hash::make('admin123'), // Password dienkripsi
-            'role' => 'admin'
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@shop.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin'
+            ]
+        );
+    
+        // Membuat akun user dengan email dan password default
+        User::firstOrCreate(
+            ['email' => 'user@shop.com'],
+            [
+                'name' => 'User', // Fixed name from 'Admin' to 'User'
+                'password' => Hash::make('12345'),
+                'role' => 'user'
+            ]
+        );
     }
+    
 }
